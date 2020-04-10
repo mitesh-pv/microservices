@@ -32,12 +32,12 @@ public class MovieCatalogService {
         // RestTemplate restTemplate = new RestTemplate();   => needs to be created as a bean and do the dependency injection
 
         // get all rated movie ids
-        UserRating userRating = restTemplate.getForObject("http://localhost:8089/ratingsdata/users/"+userId, UserRating.class);
+        UserRating userRating = restTemplate.getForObject("http://ratings-data-service/ratingsdata/users/"+userId, UserRating.class);
 
         return userRating.getUserRating().stream()
                 // for each movie id call movie info service and get details
                 .map(rating -> {
-                     Movie movie = restTemplate.getForObject("http://localhost:8090/movies/"+rating.getMovieId(), Movie.class);
+                     Movie movie = restTemplate.getForObject("http://movie-info-service/movies/"+rating.getMovieId(), Movie.class);
                     /* Movie movie = webClientBuilder.build()
                             .get()
                             .uri("http://localhost:8090/movies/"+rating.getMovieId())
