@@ -7,7 +7,7 @@ Basic implementation of microservices using spring boot
 
 ## Fault Tolerance
 
-Method solve the slowness issue
+### Method to solve the slowing issue
 
 Suppose a service slows down.
 All the dependent and independent systems also slows down because of the inactive threads in the WebServers thread pool.
