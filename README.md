@@ -170,16 +170,16 @@ This can be granularated into below methods.
 Creating separate thread pools for different requests.
 
 ```java
-	@HystrixCommand(fallbackMethod = "getFallbackCatalogItem",
-            threadPoolKey = "movieInfoPool",
-            threadPoolProperties = {
-                    @HystrixProperty(name = "coreSize", value = "20"),
-                    @HystrixProperty(name = "maxQueueSize", value = "10")
-            }
+   @HystrixCommand(fallbackMethod = "getFallbackCatalogItem",
+   	threadPoolKey = "movieInfoPool",
+        threadPoolProperties = {
+        	@HystrixProperty(name = "coreSize", value = "20"),
+        	@HystrixProperty(name = "maxQueueSize", value = "10")
+        }
 
-    	)
-    	public CatalogItem getCatalogItemRating(Rating rating) {
-        	Movie movie = restTemplate.getForObject("http://movie-info-service/movies/"+rating.getMovieId(), Movie.class);
-        	return new CatalogItem(movie.getName(), movie.getDescription(), rating.getRating());
-    	}
+    )
+    public CatalogItem getCatalogItemRating(Rating rating) {
+        Movie movie = restTemplate.getForObject("http://movie-info-service/movies/"+rating.getMovieId(), Movie.class);
+        return new CatalogItem(movie.getName(), movie.getDescription(), rating.getRating());
+    }
 ```  
