@@ -54,8 +54,19 @@ This is the reason that further requests also slows down, because of not being a
 ### Circuit breakers are required
 * Failing fast.
 * Having fallback functionality.
-* Automatica recovery.
+* Automatic recovery.
 
 ### To write a fallback mechanism, we need to write the multithreading and concurrency programs which is complicated and tidious. 
-**Hystrix** is a library that solves this problem. 
+**Hystrix** is a library that solves this problem.  
+Hystrix is a Netflix library, and works very well with spring boot.  
+It is not longer under development by Netflix.  
+
+* Add dependency - spring-cloud-starter-starter-netflix-hystrix.  
+* Add annotation @EnableCircuitBreaker to the application.  
+* Add @HystrixCommand to methods that need circuit breaker.  
+
+
+
+
   
+
