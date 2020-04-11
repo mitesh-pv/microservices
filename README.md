@@ -158,10 +158,10 @@ This can be granularated into below methods.
 
 ### Setting up the Hystrix Dashboard
 
-1. Add dependency - spring-cloud-starter-netflix-hystrix-dashboard
+1. **Add dependency** - spring-cloud-starter-netflix-hystrix-dashboard
 		   spring-boot-starter-actuator
-2. Add Annotation to application class - @EnableHystrixDashboard
-3. Add to the application.properties file - management.endpoints.web.exposure.include=hystrix.stream
+2. **Add Annotation to application class** - @EnableHystrixDashboard
+3. **Add to the application.properties file** - management.endpoints.web.exposure.include=hystrix.stream
 
 #### Hystrix dashboard can be seen in the link - localhost:<port>/hystrix
 
