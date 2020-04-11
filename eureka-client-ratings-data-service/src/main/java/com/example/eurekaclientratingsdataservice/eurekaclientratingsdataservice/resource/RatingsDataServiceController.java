@@ -13,23 +13,15 @@ import java.util.Arrays;
 public class RatingsDataServiceController {
 
 
-    @RequestMapping("/{movieId}")
+    @RequestMapping("movies/{movieId}")
     public Rating getRating(@PathVariable("movieId") String movieId){
         return new Rating(movieId, 4);
     }
 
     @RequestMapping("users/{userId}")
     public UserRating getUserRating(@PathVariable("userId") String userId){
-
         UserRating userRating = new UserRating();
-        userRating.setUserRating(
-                Arrays.asList(
-                        new Rating("1234", 4),
-                        new Rating("5678", 8)
-                )
-        );
-
+        userRating.initData(userId);
         return userRating;
-
     }
 }

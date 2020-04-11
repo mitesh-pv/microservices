@@ -47,7 +47,7 @@ public class MovieCatalogService {
                     // bodyToMono ==> reactive programming in which in future data is going to be loaded
                      */
                     // put them all together
-                    return new CatalogItem(movie.getName(), "desc", rating.getRating());
+                    return new CatalogItem(movie.getName(), movie.getDescription(), rating.getRating());
                 }).collect(Collectors.toList());
 
 

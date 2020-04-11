@@ -2,23 +2,26 @@ package com.example.eurekaclientmoviecatalogservice.eurekaclientmoviecatalogserv
 
 public class Movie {
 
-    String movieId;
+    String id;
     String name;
+    String description;
+
 
     public Movie() {
     }
 
-    public Movie(String movieId, String name) {
-        this.movieId = movieId;
+    public Movie(String id, String name, String description) {
+        this.id = id;
         this.name = name;
+        this.description = description;
     }
 
-    public String getMovieId() {
-        return movieId;
+    public String getId() {
+        return id;
     }
 
-    public void setMovieId(String movieId) {
-        this.movieId = movieId;
+    public void setId(String movieId) {
+        this.id = movieId;
     }
 
     public String getName() {
@@ -29,11 +32,20 @@ public class Movie {
         this.name = name;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public String toString() {
         return "Movie{" +
-                "movieId='" + movieId + '\'' +
+                "id='" + id + '\'' +
                 ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
                 '}';
     }
 }
