@@ -9,11 +9,11 @@ Basic implementation of microservices using spring boot
 
 ### Method to solve the slowing issue
 
-Suppose a service slows down.
+* Suppose a service slows down.
 All the dependent and independent systems also slows down because of the inactive threads in the WebServers thread pool.
-Since WebServers follows thread per request model, so the threads waiting for the response from slow services stacks up on the thread pool.
+* Since WebServers follows thread per request model, so the threads waiting for the response from slow services stacks up on the thread pool.
 This is the reason that further requests also slows down, because of not being able to create further thread.
-Temporary solution to this can be using Timeout methods. Setting up timeout for slow threads. 
+* Temporary solution to this can be using Timeout methods. Setting up timeout for slow threads.
 
 ```java
 	
@@ -32,3 +32,8 @@ Temporary solution to this can be using Timeout methods. Setting up timeout for 
 		return new RestTemplate(clientHttpRequestFactory);
 	}
 ```
+
+#### Best solution   
+* detect something is wrong
+* take temporary steps to avoid getting the situation worse. (if some service doestn't responds, stop sending requests for a while.
+* Deactivate the problem so that it does not effect the downstream components. 
