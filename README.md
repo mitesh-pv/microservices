@@ -36,4 +36,26 @@ This is the reason that further requests also slows down, because of not being a
 #### Best solution - **Circuit Breaker Pattern** 
 * detect something is wrong
 * take temporary steps to avoid getting the situation worse. (if some service doestn't responds, stop sending requests for a while.
-* Deactivate the problem so that it does not effect the downstream components. 
+* Deactivate the problem so that it does not effect the downstream components.
+
+#### Decisions upon which circuit triping depends.
+1. Last n request to be condidered for the decision.
+2. How many of those should fail?
+3. Timeout duration.
+
+#### When doest circuit gets back to normal?
+1. How long to wait after the circuit breaks to try again?
+
+### We need to do fallback if a circuit breaks
+* Throw an error.
+* Return a fallback default response.
+* Save previous response in a cache and use that when possible.
+
+### Circuit breakers are required
+* Failing fast.
+* Having fallback functionality.
+* Automatica recovery.
+
+### To write a fallback mechanism, we need to write the multithreading and concurrency programs which is complicated and tidious. 
+**Hystrix** is a library that solves this problem. 
+  
