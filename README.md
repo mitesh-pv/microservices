@@ -33,7 +33,7 @@ This is the reason that further requests also slows down, because of not being a
 	}
 ```
 
-#### Best solution   
+#### Best solution - **Circuit Breaker Pattern** 
 * detect something is wrong
 * take temporary steps to avoid getting the situation worse. (if some service doestn't responds, stop sending requests for a while.
 * Deactivate the problem so that it does not effect the downstream components. 
