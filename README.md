@@ -163,7 +163,7 @@ This can be granularated into below methods.
 2. **Add Annotation to application class** - @EnableHystrixDashboard
 3. **Add to the application.properties file** - management.endpoints.web.exposure.include=hystrix.stream
 
-#### Hystrix dashboard can be seen in the link - localhost:<port>/hystrix
+#### Hystrix dashboard can be seen in the link - localhost:port/hystrix
 
 
   
