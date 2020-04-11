@@ -3,7 +3,11 @@ package com.example.eurekaclientmoviecatalogservice.eurekaclientmoviecatalogserv
 
 import com.example.eurekaclientmoviecatalogservice.eurekaclientmoviecatalogservice.model.CatalogItem;
 import com.example.eurekaclientmoviecatalogservice.eurekaclientmoviecatalogservice.model.Movie;
+import com.example.eurekaclientmoviecatalogservice.eurekaclientmoviecatalogservice.model.Rating;
 import com.example.eurekaclientmoviecatalogservice.eurekaclientmoviecatalogservice.model.UserRating;
+import com.example.eurekaclientmoviecatalogservice.eurekaclientmoviecatalogservice.service.MovieInfo;
+import com.example.eurekaclientmoviecatalogservice.eurekaclientmoviecatalogservice.service.UserRatingInfo;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,30 +31,28 @@ public class MovieCatalogService {
     @Autowired
     private WebClient.Builder webClientBuilder;
 
+    @Autowired
+    private MovieInfo movieInfo;
+
+    @Autowired
+    private UserRatingInfo userRatingInfo;
+
     @RequestMapping("/{userId}")
+    // @HystrixCommand(fallbackMethod = "getFallbackCatalog")
     public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
 
         // RestTemplate restTemplate = new RestTemplate();   => needs to be created as a bean and do the dependency injection
 
         // get all rated movie ids
-        UserRating userRating = restTemplate.getForObject("http://ratings-data-service/ratingsdata/users/"+userId, UserRating.class);
+        UserRating userRating = userRatingInfo.getUserRating(userId);
 
         return userRating.getUserRating().stream()
-                // for each movie id call movie info service and get details
-                .map(rating -> {
-                     Movie movie = restTemplate.getForObject("http://movie-info-service/movies/"+rating.getMovieId(), Movie.class);
-                    /* Movie movie = webClientBuilder.build()
-                            .get()
-                            .uri("http://localhost:8090/movies/"+rating.getMovieId())
-                            .retrieve()
-                            .bodyToMono(Movie.class)
-                            .block();
-                    // bodyToMono ==> reactive programming in which in future data is going to be loaded
-                     */
-                    // put them all together
-                    return new CatalogItem(movie.getName(), movie.getDescription(), rating.getRating());
-                }).collect(Collectors.toList());
-
-
+                .map(rating -> movieInfo.getCatalogItemRating(rating))
+                .collect(Collectors.toList());
     }
+
+    public List<CatalogItem> getFallbackCatalog(@PathVariable("userId") String userId){
+        return Arrays.asList(new CatalogItem("No movie", "", 0));
+    }
+
 }

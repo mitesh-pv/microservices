@@ -64,9 +64,106 @@ It is not longer under development by Netflix.
 * Add dependency - spring-cloud-starter-starter-netflix-hystrix.  
 * Add annotation @EnableCircuitBreaker to the application.  
 * Add @HystrixCommand to methods that need circuit breaker.  
+* Configure Hystrix behaviour.
+
+```java
+    @RequestMapping("/{userId}")
+    @HystrixCommand(fallbackMethod = "getFallbackCatalog")
+    public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){}
+```
+
+Fallback method should be simple hadcoded response or taken from the cache with minimum possibility of getting faulty.  
+
+Hystrix wraps the API class inside a Proxy class.   
+Hence when this method is invoked, instance of a proxy class is returned instead of the API class.  
+This proxy class contains the Circuit Breaker logic.  
+
+### Problems with Hystrix proxy
+If from several api calls, one of them is failing, then whole method is proxied by the fallback method.  
+Hence we need to improve the  granularity in our api calling mechanism along with fallback mechanism.  
+
+```java
+    @RequestMapping("/{userId}")
+    @HystrixCommand(fallbackMethod = "getFallbackCatalog")
+    public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
+
+        // RestTemplate restTemplate = new RestTemplate();   => needs to be created as a bean and do the dependency injection
+
+        // get all rated movie ids
+        UserRating userRating = restTemplate.getForObject("http://ratings-data-service/ratingsdata/users/"+userId, UserRating.class);
+
+        return userRating.getUserRating().stream()
+                // for each movie id call movie info service and get details
+                .map(rating -> {
+                     Movie movie = restTemplate.getForObject("http://movie-info-service/movies/"+rating.getMovieId(), Movie.class);
+                    /* Movie movie = webClientBuilder.build()
+                            .get()
+                            .uri("http://localhost:8090/movies/"+rating.getMovieId())
+                            .retrieve()
+                            .bodyToMono(Movie.class)
+                            .block();
+                    // bodyToMono ==> reactive programming in which in future data is going to be loaded
+                     */
+                    // put them all together
+                    return new CatalogItem(movie.getName(), movie.getDescription(), rating.getRating());
+                }).collect(Collectors.toList());
 
 
+    }
+```
+
+This can be granularated into below methods.  
+
+```java
+    @RequestMapping("/{userId}")
+    @HystrixCommand(fallbackMethod = "getFallbackCatalog")
+    public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
+
+        // RestTemplate restTemplate = new RestTemplate();   => needs to be created as a bean and do the dependency injection
+
+        // get all rated movie ids
+        UserRating userRating = getUserRating(userId);
+
+        return userRating.getUserRating().stream()
+                .map(rating -> getCatalogItemRating(rating))
+                .collect(Collectors.toList());
+    }
+
+    @HystrixCommand(fallbackMethod = "getFallbackUserRating")
+    private UserRating getUserRating(String userId) {
+        return restTemplate.getForObject("http://ratings-data-service/ratingsdata/users/"+userId, UserRating.class);
+    }
+
+    @HystrixCommand(fallbackMethod = "getFallbackCatalogItem")
+    private CatalogItem getCatalogItemRating(Rating rating) {
+        Movie movie = restTemplate.getForObject("http://movie-info-service/movies/"+rating.getMovieId(), Movie.class);
+        return new CatalogItem(movie.getName(), movie.getDescription(), rating.getRating());
+    }
+```
+### Setting up rest of the Hystrix properties (timeout, no-of-requests-under-consideration etc...)
+
+```java
+    @HystrixCommand(fallbackMethod = "getFallbackUserRating",
+            commandProperties = {
+                    @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "2000"),
+                    @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "5"),
+                    @HystrixProperty(name = "circuitBreaker.errorThresholdPercentage", value = "50"),
+                    @HystrixProperty(name = "circuitBreaker.sleepWindowInMilliseconds", value = "5000")
+            }
+    )
+    public UserRating getUserRating(String userId) {
+        return restTemplate.getForObject("http://ratings-data-service/ratingsdata/users/"+userId, UserRating.class);
+    }
+```
+
+### Setting up the Hystrix Dashboard
+
+1. Add dependency - spring-cloud-starter-netflix-hystrix-dashboard
+		   spring-boot-starter-actuator
+2. Add Annotation to application class - @EnableHystrixDashboard
+3. Add to the application.properties file - management.endpoints.web.exposure.include=hystrix.stream
+
+#### Hystrix dashboard can be seen in the link - localhost:<port>/hystrix
 
 
   
-
