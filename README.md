@@ -15,7 +15,8 @@ Since WebServers follows thread per request model, so the threads waiting for th
 This is the reason that further requests also slows down, because of not being able to create further thread.
 Temporary solution to this can be using Timeout methods. Setting up timeout for slow threads. 
 
-'''java
+```java
+	
 	@LoadBalanced // gives a hint to discovery server about what service is to be called
 	@Bean
 	public RestTemplate getRestTemplate(){
@@ -30,4 +31,4 @@ Temporary solution to this can be using Timeout methods. Setting up timeout for 
 		clientHttpRequestFactory.setConnectTimeout(3000);
 		return new RestTemplate(clientHttpRequestFactory);
 	}
-'''
+```
