@@ -255,11 +255,14 @@ Needs of configurations - push configurations to production without having to bu
 #### Externalize the properties file
 
 * cd into /target folder, create a  file ./application.properties, add configurations to it, run the jar file as  
-java -jar spring-boot-config-0.0.1-SNAPSHOT.jar  
+```bash
+java -jar spring-boot-config-0.0.1-SNAPSHOT.jar
+```  
 
 * passing the properties along with command line  
+```bash
 java -jar spring-boot-config-0.0.1-SNAPSHOT.jar --app.greetings="hello world from command line"
-
+```
 
 
 
