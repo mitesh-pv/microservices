@@ -225,4 +225,53 @@ Creating separate thread pools for different requests.
         Movie movie = restTemplate.getForObject("http://movie-info-service/movies/"+rating.getMovieId(), Movie.class);
         return new CatalogItem(movie.getName(), movie.getDescription(), rating.getRating());
     }
-```  
+```
+
+## Configurations of Microservices
+
+Examples of configurations: 
+1. Database connections
+2. Credentials
+3. Feature flags 
+4. Business logic configuration parameters
+5. Scenario testing
+6. Spring boot configuration
+
+Needs of configurations - push configurations to production without having to build and test.  
+
+### Types of configs
+1. XML files
+2. properties files
+3. yml files
+4. JSON files
+
+### Goals needs to be achieved for configuration files
+1. It needs to be Externalized (separate from application)
+2. It needs to be environment specific.
+3. It should be consistent across all the files of the application.
+4. It should have a version history.
+5. Real time management (changes should be reflected in real time).
+
+#### Externalize the properties file
+
+* cd into /target folder, create a  file ./application.properties, add configurations to it, run the jar file as  
+java -jar spring-boot-config-0.0.1-SNAPSHOT.jar  
+
+* passing the properties along with command line  
+java -jar spring-boot-config-0.0.1-SNAPSHOT.jar --app.greetings="hello world from command line"
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
