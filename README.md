@@ -114,29 +114,74 @@ This can be granularated into below methods.
 
 ```java
     @RequestMapping("/{userId}")
-    @HystrixCommand(fallbackMethod = "getFallbackCatalog")
+    // @HystrixCommand(fallbackMethod = "getFallbackCatalog")
     public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
 
         // RestTemplate restTemplate = new RestTemplate();   => needs to be created as a bean and do the dependency injection
 
         // get all rated movie ids
-        UserRating userRating = getUserRating(userId);
+        UserRating userRating = userRatingInfo.getUserRating(userId);
 
         return userRating.getUserRating().stream()
-                .map(rating -> getCatalogItemRating(rating))
+                .map(rating -> movieInfo.getCatalogItemRating(rating))
                 .collect(Collectors.toList());
     }
 
-    @HystrixCommand(fallbackMethod = "getFallbackUserRating")
-    private UserRating getUserRating(String userId) {
-        return restTemplate.getForObject("http://ratings-data-service/ratingsdata/users/"+userId, UserRating.class);
+    public List<CatalogItem> getFallbackCatalog(@PathVariable("userId") String userId){
+        return Arrays.asList(new CatalogItem("No movie", "", 0));
     }
 
-    @HystrixCommand(fallbackMethod = "getFallbackCatalogItem")
-    private CatalogItem getCatalogItemRating(Rating rating) {
-        Movie movie = restTemplate.getForObject("http://movie-info-service/movies/"+rating.getMovieId(), Movie.class);
-        return new CatalogItem(movie.getName(), movie.getDescription(), rating.getRating());
+   @Service
+   public class MovieInfo {
+	@Autowired
+    	private RestTemplate restTemplate;
+
+    	@HystrixCommand(fallbackMethod = "getFallbackCatalogItem",
+            threadPoolKey = "movieInfoPool",
+            threadPoolProperties = {
+                    @HystrixProperty(name = "coreSize", value = "20"),
+                    @HystrixProperty(name = "maxQueueSize", value = "10")
+            }
+
+    	)
+    	public CatalogItem getCatalogItemRating(Rating rating) {
+        	Movie movie = restTemplate.getForObject("http://movie-info-service/movies/"+rating.getMovieId(), Movie.class);
+        	return new CatalogItem(movie.getName(), movie.getDescription(), rating.getRating());
+    	}
+    	private CatalogItem getFallbackCatalogItem(Rating rating){
+        	return new CatalogItem("No movies", "", rating.getRating());
+    	}
     }
+ 
+  @Service
+  public class UserRatingInfo {
+
+	 @Autowired
+    	private RestTemplate restTemplate;
+
+    	@HystrixCommand(fallbackMethod = "getFallbackUserRating",
+            commandProperties = {
+                    @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "2000"),
+                    @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "5"),
+                    @HystrixProperty(name = "circuitBreaker.errorThresholdPercentage", value = "50"),
+                    @HystrixProperty(name = "circuitBreaker.sleepWindowInMilliseconds", value = "5000")
+            }
+    	)
+    	public UserRating getUserRating(String userId) {
+        	return restTemplate.getForObject("http://ratings-data-service/ratingsdata/users/"+userId, UserRating.class);
+    	}
+
+    	private UserRating getFallbackUserRating(String userId){
+        	UserRating userRating = new UserRating();
+        	userRating.setUserId(userId);
+        	userRating.setUserRating(
+                	Arrays.asList(new Rating("no movie", 0))
+        	);
+
+        	return userRating;
+    	}
+}
+    
 ```
 ### Setting up rest of the Hystrix properties (timeout, no-of-requests-under-consideration etc...)
 
